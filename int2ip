@@ -1,0 +1,15 @@
+#! /bin/bash
+
+# base code stolen from:
+# http://scripting.tribe.net/thread/68d349f4-9824-4338-8a19-95fb085ec026
+
+int_to_ip () 
+{ 
+  echo -n $(($(($(($((${1}/256))/256))/256))%256)). 
+  echo -n $(($(($((${1}/256))/256))%256)). 
+  echo -n $(($((${1}/256))%256)). 
+  echo $((${1}%256)) 
+} 
+
+
+int_to_ip $1

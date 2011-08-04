@@ -1,0 +1,17 @@
+#! /bin/bash
+
+# base code stolen from:
+# http://scripting.tribe.net/thread/68d349f4-9824-4338-8a19-95fb085ec026
+
+ip_to_int () 
+{ 
+  IP=$1; IPNUM=0 
+  for (( i=0 ; i<4 ; ++i )); do 
+    ((IPNUM+=${IP%%.*}*$((256**$((3-${i})))))) 
+    IP=${IP#*.} 
+  done 
+  echo $IPNUM 
+} 
+
+
+ip_to_int $1
