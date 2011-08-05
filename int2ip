@@ -11,5 +11,17 @@ int_to_ip ()
   echo $((${1}%256)) 
 } 
 
+# check commandline for right number of arguments and print usage if necessary.
+if [[ $# != 1 ]]; then
+  echo "USAGE:"
+  echo "    $0 <ip_address_int>"
+  echo ""
+  echo "    Convert an IPv4 address (as a 32-bit integer) to the dotted octet notation"
+  echo "    eg:"
+  echo "        $0 176941832 #=> 10.139.235.8"
+  echo ""
+  
+  exit 0
+fi
 
 int_to_ip $1
