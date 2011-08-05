@@ -1,0 +1,91 @@
+#! /bin/bash
+
+print_usage () {
+  echo "USAGE:"
+  echo "    $0 <ip_address> <cidr>"
+  echo ""
+  echo "    ip_address - the address in question (eg: 10.139.138.155)"
+  echo "    cidr       - the subnet in question (eg: 10.139.138.0/24)"
+  echo ""
+}
+
+
+# will exit program with a bad status if ipcalc is not installed
+sanity_check () {
+  IPCALC=`which ipcalc`
+  
+  if [[ -z "$IPCALC" ]]; then
+    echo "ipcalc is not found in your path. ack!" >&2
+    exit 1
+  fi
+}
+
+ip_to_int () 
+{ 
+  local IP=$1
+  local IPNUM=0
+   
+  for (( i=0 ; i<4 ; ++i )); do 
+    ((IPNUM+=${IP%%.*}*$((256**$((3-${i})))))) 
+    IP=${IP#*.} 
+  done
+   
+  echo $IPNUM 
+}
+
+int_to_ip () 
+{ 
+  echo -n $(($(($(($((${1}/256))/256))/256))%256)). 
+  echo -n $(($(($((${1}/256))/256))%256)). 
+  echo -n $(($((${1}/256))%256)). 
+  echo $((${1}%256)) 
+}
+
+# return the start address and end address (including wire and broadcast)
+subnet_to_range () {
+  echo ""
+}
+
+# return the start address of a subnet
+subnet_start_address () {
+  echo `ipcalc --nobinary --nocolor $* | grep "HostMin" | awk -F ":" '{ print $2 }'`
+}
+
+# return the end address of a subnet
+subnet_end_address() {
+  echo `ipcalc --nobinary --nocolor $* | grep "HostMax" | awk -F ":" '{ print $2 }'`
+}
+
+# return the number of addresses in the block
+subnet_host_count () {
+  echo `ipcalc --nobinary --nocolor $* | grep "Hosts/Net" | awk -F ":" '{ print $2 }' | awk -F ' ' '{ print $1 }'`
+}
+
+# do sanity check.
+sanity_check
+ 
+if [[ $# != 2 ]]; then
+  print_usage
+  exit 0
+fi
+
+ADDRESS=$1
+SUBNET=$2
+
+ADDRESS_INT=`ip_to_int $ADDRESS`
+
+START=`subnet_start_address $SUBNET`
+END=`subnet_end_address $SUBNET`
+
+START=`ip_to_int $START`
+END=`ip_to_int $END`
+
+if [[ $ADDRESS_INT > $START && $ADDRESS_INT < $END ]]; then
+  echo "$ADDRESS is inside $SUBNET"
+  exit 0
+else
+  echo "$ADDRESS is NOT inside $SUBNET"
+  exit 1
+fi
+
+
